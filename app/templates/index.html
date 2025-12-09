@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Exchange Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">🚀 Crypto Exchange Admin</h1>
+
+    <div class="row text-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-success mb-3">
+                <div class="card-header bg-success text-white">Баланс USD 💵</div>
+                <div class="card-body">
+                    <h2 class="card-title">{{ wallet.balance_usd }} $</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm border-warning mb-3">
+                <div class="card-header bg-warning text-dark">Баланс BTC ₿</div>
+                <div class="card-body">
+                    <h2 class="card-title">{{ wallet.balance_btc }} BTC</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mt-4">
+        <div class="card-body">
+            <h4 class="card-title">Купити Біткоїн</h4>
+            <form action="/buy" method="post" class="row g-3 align-items-center">
+                <div class="col-auto">
+                    <label for="amount" class="col-form-label">Сума ($):</label>
+                </div>
+                <div class="col-auto">
+                    <input type="number" id="amount" name="amount" class="form-control" placeholder="Наприклад: 500">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">Купити BTC</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
