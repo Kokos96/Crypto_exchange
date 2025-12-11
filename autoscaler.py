@@ -23,7 +23,7 @@ def get_current_replicas():
                 count += 1
         return max(count, 1)
     except Exception as e:
-        print(f"⚠️ Помилка зчитування реплік: {e}")
+        print(f"Помилка зчитування реплік: {e}")
         return 1
 
 def get_avg_cpu_usage():
@@ -56,36 +56,36 @@ def get_avg_cpu_usage():
         return sum(percentages) / len(percentages)
 
     except Exception as e:
-        print(f"⚠️ Помилка отримання статистики CPU: {e}")
+        print(f"Помилка отримання статистики CPU: {e}")
         return 0.0
 
 def scale_service(replicas):
     """Виконує команду масштабування"""
-    print(f"⚖️ Змінюю кількість контейнерів на: {replicas}...")
+    print(f"Змінюю кількість контейнерів на: {replicas}...")
     # Тут використовуємо shell=True, бо docker-compose це часто зручніше запускати як рядок
     cmd = f"docker-compose up -d --scale {SERVICE_NAME}={replicas} --no-recreate"
     subprocess.run(cmd, shell=True)
 
 def main():
-    print("--- 🚀 AUTOSCALER ЗАПУЩЕНО (Windows Compatible) ---")
+    print("--- AUTOSCALER ЗАПУЩЕНО (Windows Compatible) ---")
     print(f"Слідкую за сервісом: {SERVICE_NAME}")
     
     current_replicas = get_current_replicas()
     
     while True:
         avg_cpu = get_avg_cpu_usage()
-        print(f"📊 Поточне навантаження CPU: {avg_cpu:.2f}% | Контейнерів: {current_replicas}")
+        print(f"Поточне навантаження CPU: {avg_cpu:.2f}% | Контейнерів: {current_replicas}")
 
         # Логіка МАСШТАБУВАННЯ (SCALE UP)
         if avg_cpu > MAX_CPU_THRESHOLD and current_replicas < MAX_REPLICAS:
-            print("🔥 Високе навантаження! Додаю потужності!")
+            print("Високе навантаження — нарощую кількість контейнерів.")
             current_replicas += 1
             scale_service(current_replicas)
             time.sleep(10) # Чекаємо, поки нові контейнери запустяться
 
         # Логіка ЗМЕНШЕННЯ (SCALE DOWN)
         elif avg_cpu < MIN_CPU_THRESHOLD and current_replicas > MIN_REPLICAS:
-            print("❄️ Навантаження впало. Економимо ресурси.")
+            print("Навантаження впало. Зменшую кількість контейнерів.")
             current_replicas -= 1
             scale_service(current_replicas)
         

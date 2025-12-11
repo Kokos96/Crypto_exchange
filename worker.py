@@ -42,7 +42,7 @@ def process_transaction(db: Session, task_payload):
             new_tx = models.Transaction(user_id=user_id, amount_usd=amount_usd, amount_btc=btc_amount, price_at_moment=price)
             db.add(new_tx)
             db.commit()
-            print(f"Worker: ✅ Купівля виконана для {amount_usd} USD.")
+            print(f"Worker: Купівля виконана для {amount_usd} USD.")
             return True
         
     elif tx_type == "SELL":
@@ -54,11 +54,11 @@ def process_transaction(db: Session, task_payload):
             new_tx = models.Transaction(user_id=user_id, amount_usd=-amount_usd, amount_btc=-btc_required, price_at_moment=price)
             db.add(new_tx)
             db.commit()
-            print(f"Worker: ✅ Продаж виконаний для {amount_usd} USD.")
+            print(f"Worker: Продаж виконаний для {amount_usd} USD.")
             return True
 
     # Якщо недостатньо коштів, завдання просто пропускається
-    print(f"Worker: ❌ Транзакція {tx_type} не виконана (Недостатньо коштів).")
+    print(f"Worker: Транзакція {tx_type} не виконана (Недостатньо коштів).")
     return False
 
 # 3. ОСНОВНИЙ ЦИКЛ СПОЖИВАННЯ
