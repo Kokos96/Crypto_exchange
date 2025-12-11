@@ -17,6 +17,12 @@ services:
       timeout: 20s
       retries: 10
 
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+
   redis:
     image: redis:7.2-alpine
     container_name: crypto_redis
@@ -44,7 +50,7 @@ services:
   worker:
     build: .
     container_name: crypto_worker_1 
-    restart: always  # <--- Щоб не вмирав, якщо Redis тупить
+    restart: always
     depends_on:
       db:
         condition: service_healthy
@@ -55,7 +61,7 @@ services:
       DATABASE_URL: mysql+pymysql://root:root@db:3306/crypto_exchange
     volumes:
       - .:/code
-    command: ["python", "-u", "worker.py"] # <--- "-u" покаже логи миттєво
+    command: ["python", "-u", "worker.py"]
 
 volumes:
   db_data:

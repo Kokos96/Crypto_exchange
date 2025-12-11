@@ -8,10 +8,10 @@ class Wallet(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(50), unique=True, index=True)
+    password = Column(String(100))  # <--- НОВЕ ПОЛЕ
     balance_usd = Column(Float, default=10000.0)
     balance_btc = Column(Float, default=0.0)
     
-    # Зв'язок: один гаманець має багато транзакцій
     transactions = relationship("Transaction", back_populates="owner")
 
 class Transaction(Base):
@@ -21,8 +21,7 @@ class Transaction(Base):
     user_id = Column(Integer, ForeignKey("wallets.id"))
     amount_usd = Column(Float)
     amount_btc = Column(Float)
-    price_at_moment = Column(Float) # Фіксуємо курс на момент покупки
+    price_at_moment = Column(Float) 
     timestamp = Column(DateTime, default=datetime.utcnow)
 
-    # Зв'язок назад до власника
     owner = relationship("Wallet", back_populates="transactions")

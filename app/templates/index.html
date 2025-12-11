@@ -17,13 +17,13 @@
         </div>
         <div class="text-end">
             <h4>Курс BTC: <span class="badge bg-info">{{ price }} $</span></h4>
-        </div>
+            <a href="/logout" class="btn btn-outline-danger btn-sm mt-2">Вийти</a> </div>
     </div>
 
     <div class="row">
         <div class="col-md-4">
             <div class="card border-warning mb-4 shadow">
-                <div class="card-header bg-warning text-dark fw-bold">💼 Мій Портфель</div>
+                <div class="card-header bg-warning text-dark fw-bold">💼 {{ wallet.username }} (Портфель)</div>
                 <div class="card-body">
                     <p class="fs-4 mb-1">💵 {{ wallet.balance_usd | round(2) }} USD</p>
                     <p class="fs-4 text-warning">₿ {{ wallet.balance_btc | round(5) }} BTC</p>
@@ -108,7 +108,6 @@
 </div>
 
 <script>
-    // Малюємо графік
     const ctx = document.getElementById('btcChart').getContext('2d');
     const chartData = {{ chart_data }}; 
     
