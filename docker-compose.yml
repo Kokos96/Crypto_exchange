@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # Наша база даних
+  # 1. СЕРВІС БАЗИ ДАНИХ (DB)
   db:
     image: mysql:8.0
     container_name: crypto_db
@@ -13,13 +13,20 @@ services:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
-    # Перевірка здоров'я бази (щоб сайт знав, коли вона готова)
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
       timeout: 20s
       retries: 10
 
-  # Наш Python сайт (тепер у контейнері!)
+  # 2. СЕРВІС ЧЕРГИ (REDIS) - НОВИЙ КОМПОНЕНТ
+  redis:
+    image: redis:7.2-alpine
+    container_name: crypto_redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "no"] # Не зберігаємо дані на диск для швидкості
+
+  # 3. СЕРВІС САЙТУ (WEB)
   web:
     build: .
     container_name: crypto_web
@@ -28,11 +35,14 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis: # ТЕПЕР САЙТ ЧЕКАЄ ЩЕ Й НА REDIS
+        condition: service_started
     environment:
-      # Важливо: всередині докера адреса бази не 127.0.0.1, а ім'я сервісу "db"
+      # Встановлюємо URL для підключення до REDIS
+      REDIS_HOST: redis
       DATABASE_URL: mysql+pymysql://root:root@db:3306/crypto_exchange
     volumes:
-      - .:/code  # Щоб ми могли змінювати код на льоту
+      - .:/code
 
 volumes:
   db_data:
