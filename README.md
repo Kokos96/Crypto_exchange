@@ -141,19 +141,19 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 ### 🧰 Запуск воркера, load-tester та autoscaler
 
-- Запуск worker локально (окремий термінал):
+- **Запуск worker локально** (окремий термінал):
 ```powershell
-python worker.py
+python -m app.worker
 ```
 
-- Запуск load-тестера локально (налаштуйте `TARGET_URL` в `load_tester.py` або через змінну середовища):
+- **Запуск load-тестера локально** (налаштуйте `TARGET_URL` в `scripts/load_tester.py` або через змінну середовища):
 ```powershell
-python load_tester.py
+python scripts/load_tester.py
 ```
 
-- Запуск autoscaler (скрипт виконує docker-compose scale на основі CPU):
+- **Запуск autoscaler** (скрипт виконує docker-compose scale на основі CPU):
 ```powershell
-python autoscaler.py
+python scripts/autoscaler.py
 ```
 
 > Примітка: `autoscaler.py` спілкується з Docker CLI — переконайтесь, що у вас є права на виконання `docker` з поточного оточення.
@@ -190,21 +190,24 @@ docker-compose exec web sh
 Crypto_exchange/
 ├── app/                          # Основний пакет застосунку
 │   ├── __init__.py              # Ініціалізація застосунку
-│   ├── main.py                  # Головна логіка застосунку
-│   ├── database.py              # Конфігурація бази даних
-│   ├── models.py                # ORM моделі
-│   ├── routers.py               # Маршрути
+│   ├── main.py                  # Точка входу FastAPI (ASGI app)
+│   ├── database.py              # Конфігурація бази даних (SQLAlchemy)
+│   ├── models.py                # ORM моделі (Wallet, Transaction)
+│   ├── routers.py               # API маршрути
+│   ├── worker.py                # Фоновий воркер (обробка черги Redis)
 │   ├── templates/               # HTML шаблони
 │   │   ├── index.html
 │   │   └── login.html
 │   └── __pycache__/
-├── worker.py                     # Фоновий воркер
-├── autoscaler.py                 # Простий autoscaler на основі docker-compose
-├── load_tester.py                # Скрипт для локального навантажувального тестування
-├── Dockerfile
-├── docker-compose.yml
-├── requirements.txt
-└── README.md
+├── scripts/                      # Утилітні скрипти для розробки та тестування
+│   ├── autoscaler.py            # Автоматичне масштабування Docker Compose сервісів
+│   └── load_tester.py           # Навантажувальне тестування API
+├── nginx/                        # Nginx конфігурація (load balancer)
+│   └── nginx.conf
+├── Dockerfile                    # Docker образ для веб-сервісу та воркера
+├── docker-compose.yml            # Оркестрація сервісів (web, db, redis, worker, nginx)
+├── requirements.txt              # Python залежності
+└── README.md                     # Документація
 ```
 
 ---
