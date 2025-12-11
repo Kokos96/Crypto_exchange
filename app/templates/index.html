@@ -30,8 +30,8 @@
                 </div>
             </div>
 
-            <div class="card border-success shadow">
-                <div class="card-header bg-success text-white fw-bold">🛒 Купити Крипту</div>
+            <div class="card border-success shadow mb-3">
+                <div class="card-header bg-success text-white fw-bold">🛒 Купити BTC</div>
                 <div class="card-body">
                     <form action="/buy" method="post">
                         <div class="mb-3">
@@ -42,6 +42,20 @@
                     </form>
                 </div>
             </div>
+
+            <div class="card border-danger shadow">
+                <div class="card-header bg-danger text-white fw-bold">📉 Продати BTC</div>
+                <div class="card-body">
+                    <form action="/sell" method="post">
+                        <div class="mb-3">
+                            <label class="form-label text-light">Отримати ($)</label>
+                            <input type="number" name="amount" class="form-control bg-dark text-light border-secondary" placeholder="500" required>
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100 btn-lg">Продати миттєво</button>
+                    </form>
+                </div>
+            </div>
+
         </div>
 
         <div class="col-md-8">
@@ -57,24 +71,36 @@
                     <thead>
                         <tr>
                             <th>Час</th>
-                            <th>Витрачено ($)</th>
-                            <th>Отримано (BTC)</th>
-                            <th>Курс покупки</th>
+                            <th>Дія</th>
+                            <th>USD ($)</th>
+                            <th>BTC (₿)</th>
+                            <th>Курс</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for tx in history %}
                         <tr>
                             <td>{{ tx.timestamp.strftime('%H:%M:%S') }}</td>
-                            <td class="text-danger fw-bold">-{{ tx.amount_usd }} $</td>
-                            <td class="text-success fw-bold">+{{ tx.amount_btc | round(5) }}</td>
+                            <td>
+                                {% if tx.amount_usd > 0 %}
+                                    <span class="badge bg-success">КУПІВЛЯ</span>
+                                {% else %}
+                                    <span class="badge bg-danger">ПРОДАЖ</span>
+                                {% endif %}
+                            </td>
+                            <td class="{% if tx.amount_usd < 0 %}text-success{% else %}text-danger{% endif %}">
+                                {% if tx.amount_usd > 0 %}-{% else %}+{% endif %}{{ tx.amount_usd | abs | round(2) }}
+                            </td>
+                            <td class="{% if tx.amount_btc > 0 %}text-success{% else %}text-danger{% endif %}">
+                                {% if tx.amount_btc > 0 %}+{% else %}-{% endif %}{{ tx.amount_btc | abs | round(5) }}
+                            </td>
                             <td>{{ tx.price_at_moment | round(2) }} $</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
                 {% if not history %}
-                    <p class="text-center text-muted mt-3">Історія поки порожня. Зробіть першу покупку!</p>
+                    <p class="text-center text-muted mt-3">Історія поки порожня. Зробіть першу транзакцію!</p>
                 {% endif %}
             </div>
         </div>
@@ -84,7 +110,7 @@
 <script>
     // Малюємо графік
     const ctx = document.getElementById('btcChart').getContext('2d');
-    const chartData = {{ chart_data }}; // Отримуємо дані прямо з Python
+    const chartData = {{ chart_data }}; 
     
     new Chart(ctx, {
         type: 'line',
@@ -93,9 +119,9 @@
             datasets: [{
                 label: 'Bitcoin Price (USD)',
                 data: chartData,
-                borderColor: '#ffc107', // Жовтий колір бітка
+                borderColor: '#ffc107', 
                 borderWidth: 2,
-                tension: 0.4, // Робить лінію плавною
+                tension: 0.4, 
                 fill: true,
                 backgroundColor: 'rgba(255, 193, 7, 0.1)'
             }]
@@ -104,7 +130,7 @@
             responsive: true,
             plugins: {
                 legend: { display: false },
-                title: { display: true, text: 'Динаміка ринку (Live)', color: '#fff' }
+                title: { display: true, text: 'Динаміка ринку (Simulated)', color: '#fff' }
             },
             scales: {
                 x: { grid: { color: '#333' } },
