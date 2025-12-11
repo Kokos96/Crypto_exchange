@@ -18,15 +18,15 @@ services:
       timeout: 20s
       retries: 10
 
-  # 2. СЕРВІС ЧЕРГИ (REDIS) - НОВИЙ КОМПОНЕНТ
+  # 2. СЕРВІС ЧЕРГИ (REDIS)
   redis:
     image: redis:7.2-alpine
     container_name: crypto_redis
     ports:
       - "6379:6379"
-    command: ["redis-server", "--appendonly", "no"] # Не зберігаємо дані на диск для швидкості
+    command: ["redis-server", "--appendonly", "no"]
 
-  # 3. СЕРВІС САЙТУ (WEB)
+  # 3. СЕРВІС САЙТУ (WEB - ПУБЛІКАТОР)
   web:
     build: .
     container_name: crypto_web
@@ -35,14 +35,31 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      redis: # ТЕПЕР САЙТ ЧЕКАЄ ЩЕ Й НА REDIS
+      redis:
         condition: service_started
     environment:
-      # Встановлюємо URL для підключення до REDIS
       REDIS_HOST: redis
       DATABASE_URL: mysql+pymysql://root:root@db:3306/crypto_exchange
     volumes:
       - .:/code
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
+  # 4. СЕРВІС РОБІТНИКА (WORKER - СПОЖИВАЧ)
+  worker:
+    build: .
+    container_name: crypto_worker_1 
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      REDIS_HOST: redis
+      DATABASE_URL: mysql+pymysql://root:root@db:3306/crypto_exchange
+    volumes:
+      - .:/code
+    command: ["python", "worker.py"] 
+
+# ОГОЛОШЕННЯ VOLUMES (БЕЗ ЖОДНОГО ВІДСТУПУ)
 volumes:
   db_data:
