@@ -48,6 +48,11 @@ def buy_btc(request: Request, amount: float = Form(...), db: Session = Depends(d
 
     wallet = db.query(models.Wallet).filter(models.Wallet.username == "trader_1").first()
     
+    # СУВОРІ ПЕРЕВІРКИ БАГУ (Fix 1)
+    if amount <= 0:
+        print("❌ Помилка: Сума має бути більша за нуль.")
+        return read_root(request, db)
+
     if wallet and wallet.balance_usd >= amount:
         btc_amount = amount / CURRENT_BTC_PRICE
         
@@ -62,35 +67,42 @@ def buy_btc(request: Request, amount: float = Form(...), db: Session = Depends(d
         )
         db.add(new_tx)
         db.commit()
-    
+    else:
+        # Курс все одно змінюється, але транзакція не відбувається
+        print("❌ Недостатньо USD для купівлі.") 
+
     return read_root(request, db)
 
 # НОВА ФУНКЦІЯ: Продаж BTC
 @app.post("/sell")
 def sell_btc(request: Request, amount: float = Form(...), db: Session = Depends(database.get_db)):
     global CURRENT_BTC_PRICE
-    # Ринок реагує на продаж падінням або зростанням
     CURRENT_BTC_PRICE += random.uniform(-200, 100) 
 
     wallet = db.query(models.Wallet).filter(models.Wallet.username == "trader_1").first()
     
-    # Обчислюємо скільки BTC треба продати за цю суму USD
+    # СУВОРІ ПЕРЕВІРКИ БАГУ (Fix 1)
+    if amount <= 0:
+        print("❌ Помилка: Сума має бути більша за нуль.")
+        return read_root(request, db)
+        
     btc_required = amount / CURRENT_BTC_PRICE 
 
     if wallet and wallet.balance_btc >= btc_required:
-        # 1. Збільшуємо USD баланс
+        
         wallet.balance_usd += amount 
-        # 2. Зменшуємо BTC баланс
         wallet.balance_btc -= btc_required
         
-        # 3. Записуємо транзакцію в історію
         new_tx = models.Transaction(
             user_id=wallet.id,
-            amount_usd=-amount, # Від'ємне значення USD для продажів (для чіткості в історії)
-            amount_btc=-btc_required, # Від'ємне значення BTC для продажів
+            amount_usd=-amount, 
+            amount_btc=-btc_required, 
             price_at_moment=CURRENT_BTC_PRICE
         )
         db.add(new_tx)
         db.commit()
-    
+    else:
+        # Курс все одно змінюється, але транзакція не відбувається
+        print(f"❌ Недостатньо BTC для продажу. Потрібно: {btc_required}, є: {wallet.balance_btc}")
+
     return read_root(request, db)
