@@ -30,13 +30,11 @@ services:
       - "6379:6379"
     command: ["redis-server", "--appendonly", "no"]
 
-  # Твій сайт (Scalable Web App)
   web:
     build: .
-    # ПРИБРАЛИ 'container_name', щоб можна було запускати копії
     restart: always
     expose:
-      - "8000" # Відкритий тільки для Nginx, не для людей
+      - "8000"
     depends_on:
       db:
         condition: service_healthy
@@ -49,14 +47,13 @@ services:
       - .:/code
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
-  # Балансувальник (Load Balancer)
   nginx:
     image: nginx:latest
     container_name: crypto_lb
     ports:
-      - "80:80" # Вхідні двері для користувачів
+      - "80:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - web
 
@@ -73,7 +70,8 @@ services:
       DATABASE_URL: mysql+pymysql://root:root@db:3306/crypto_exchange
     volumes:
       - .:/code
-    command: ["python", "-u", "worker.py"]
+    # Запускаємо як модуль 'app.worker'
+    command: ["python", "-u", "-m", "app.worker"]
 
 volumes:
   db_data:
